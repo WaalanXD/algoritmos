@@ -1,14 +1,38 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <fstream>
+#include <chrono>
+
+// Carga cada línea del archivo como un elemento de un vector<string>
+std::vector<std::string> cargarPalabras(const std::string &rutaArchivo) {
+    std::vector<std::string> palabras;
+    std::ifstream archivo(rutaArchivo);
+
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo: " << rutaArchivo << std::endl;
+        return palabras;
+    }
+
+    std::string linea;
+    while (std::getline(archivo, linea)) {
+        if (!linea.empty()) {
+            palabras.push_back(linea);
+        }
+    }
+
+    return palabras;
+}
+
 // Función para fusionar dos sub-arreglos
-void mezclar(std::vector<int> &v, int izquierda, int medio, int derecha) {
+void mezclar(std::vector<std::string> &v, int izquierda, int medio, int derecha) {
     int n1 = medio - izquierda + 1;
     int n2 = derecha - medio;
 
     // Crear arreglos temporales
 
-    std::vector<int> L(n1);
-    std::vector<int> R(n2);
+    std::vector<std::string> L(n1);
+    std::vector<std::string> R(n2);
 
     // Copiar datos a los arreglos temporales
 
@@ -53,7 +77,7 @@ void mezclar(std::vector<int> &v, int izquierda, int medio, int derecha) {
 }
 
 // Función principal de Merge Sort
-void mergeSort(std::vector<int> &v, int izquierda, int derecha) {
+void mergeSort(std::vector<std::string> &v, int izquierda, int derecha) {
     if (izquierda < derecha) {
         int medio = izquierda + (derecha - izquierda) / 2;
 
@@ -67,7 +91,7 @@ void mergeSort(std::vector<int> &v, int izquierda, int derecha) {
 }
 
 // Función para imprimir el vector
-void printArray(std::vector<int> &v, int size) {
+void printArray(std::vector<std::string> &v, int size) {
     for (int i = 0; i < size; i++)
         std::cout << v[i] << " ";
     std::cout << std::endl;
@@ -75,16 +99,29 @@ void printArray(std::vector<int> &v, int size) {
 
 // Función principal para probar el algoritmo
 int main() {
-    std::vector<int> datos = {38, 27, 43, 3, 9, 82, 10};
-    int tamaño = datos.size();
+    std::vector<std::string> palabras = cargarPalabras("../dataset.txt");
 
-    std::cout << "Arreglo original: ";
-    printArray(datos, tamaño);
+    if (palabras.empty()) {
+        std::cerr << "No se cargaron palabras, revisa la ruta del dataset." << std::endl;
+        return 1;
+    }
 
-    mergeSort(datos, 0, tamaño - 1);
+    std::cout << "Palabras cargadas: " << palabras.size() << std::endl;
 
-    std::cout << "Arreglo ordenado: ";
-    printArray(datos, tamaño);
+    int tamaño = palabras.size();
+
+    auto inicio = std::chrono::high_resolution_clock::now();
+
+    mergeSort(palabras, 0, tamaño - 1);
+
+    auto fin = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duracion = fin - inicio;
+
+    std::cout << "Tiempo de ejecucion (mergesort): " << duracion.count() << " ms" << std::endl;
+
+    std::cout << "Primeras 10 palabras ordenadas:" << std::endl;
+    for (int i = 0; i < 10 && i < tamaño; i++)
+        std::cout << palabras[i] << std::endl;
 
     return 0;
 }
